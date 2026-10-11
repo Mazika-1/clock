@@ -1458,7 +1458,7 @@ function clientApp() {
     if (settings.moveLimitEnabled) extras.push(settings.moveLimit + "s move limit");
     if (settings.passEnabled) extras.push(settings.passLabel + " button");
     if (settings.atZero === "overtime" && settings.timing !== "countup") extras.push("overtime");
-    $("#summary").innerHTML = `<b>${n} player${n > 1 ? "s" : ""} · ${esc(baseLabel())}</b><span>${order}${extras.length ? " · " + esc(extras.join(" · ")) : ""}</span>`;
+    $("#summary").innerHTML = `<b>${n} player${n > 1 ? "s" : ""} · ${esc(baseLabel())}</b> <span>${order}${extras.length ? " · " + esc(extras.join(" · ")) : ""}</span>`;
   }
 
   function setSetting(key, value, opts) {
