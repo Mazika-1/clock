@@ -69,6 +69,13 @@ ${styleCSS()}
     </div>
   </div>
 
+  <div class="mode-bar">
+    <div class="seg mode-seg" data-bind="uiMode" role="radiogroup" aria-label="Settings detail">
+      <button type="button" data-v="simple">${svg("sparkle")} Simple</button>
+      <button type="button" data-v="advanced">${svg("sliders")} Advanced</button>
+    </div>
+  </div>
+
   <div class="cards">
 
     <section class="card card-wide">
@@ -97,7 +104,7 @@ ${styleCSS()}
         <button class="chip-btn" id="shuffleBtn" type="button">${svg("shuffle")} Shuffle seats</button>
         <button class="chip-btn" id="resetNamesBtn" type="button">${svg("undo")} Reset names</button>
       </div>
-      <label class="field toggle">
+      <label class="field toggle adv-only">
         <span><b>Handicap</b><small>Give each player their own starting time</small></span>
         <input type="checkbox" class="switch" data-bind="perPlayerTimes">
       </label>
@@ -111,6 +118,7 @@ ${styleCSS()}
         <label><input type="number" inputmode="numeric" min="0" max="59" data-bind="baseSeconds" aria-label="Seconds"><span>sec</span></label>
       </div>
       <div class="quick-times" data-show="!perPlayerTimes&amp;timing!=countup" id="quickTimes"></div>
+      <div class="adv-only">
       <div class="seg" data-bind="timing" role="radiogroup" aria-label="Timing mode">
         <button type="button" data-v="none">Sudden death</button>
         <button type="button" data-v="increment">Increment</button>
@@ -137,9 +145,10 @@ ${styleCSS()}
           <span class="num"><input type="number" inputmode="numeric" min="1" max="600" data-bind="byoSeconds"><i>s</i></span>
         </label>
       </div>
+      </div>
     </section>
 
-    <section class="card">
+    <section class="card adv-only">
       <h2>${svg("route")} Turns</h2>
       <div class="field col">
         <span><b>Turn order</b></span>
@@ -189,7 +198,7 @@ ${styleCSS()}
       </div>
     </section>
 
-    <section class="card">
+    <section class="card adv-only">
       <h2>${svg("mic")} Game-show pass</h2>
       <label class="field toggle">
         <span><b>Pass button</b><small>Shows a big countdown, e.g. "Pass! 5… 4… 3…"</small></span>
@@ -221,7 +230,7 @@ ${styleCSS()}
       </div>
     </section>
 
-    <section class="card">
+    <section class="card adv-only">
       <h2>${svg("bell")} Alerts</h2>
       <label class="field toggle" data-show="timing!=countup">
         <span><b>Low-time warning</b><small>Clock pulses red</small></span>
@@ -267,7 +276,7 @@ ${styleCSS()}
       </label>
     </section>
 
-    <section class="card card-wide">
+    <section class="card card-wide adv-only">
       <h2>${svg("sparkle")} Look &amp; feel</h2>
       <div class="field col">
         <span><b>Theme</b></span>
@@ -315,7 +324,7 @@ ${styleCSS()}
       </label>
     </section>
 
-    <section class="card card-wide share-card">
+    <section class="card card-wide share-card adv-only">
       <div>
         <h2>${svg("link")} Share this setup</h2>
         <p class="explain">Send a link with these exact settings so friends can open the same clock.</p>
@@ -324,6 +333,14 @@ ${styleCSS()}
         <button class="chip-btn" id="shareBtn" type="button">${svg("link")} Copy link</button>
         <button class="chip-btn danger" id="resetBtn" type="button">${svg("trash")} Reset everything</button>
       </div>
+    </section>
+
+    <section class="card card-wide simple-only more-card">
+      <div>
+        <h2>${svg("sliders")} Want more control?</h2>
+        <p class="explain">Advanced adds timing modes (increment, delay, byo-yomi…), turn order, move time limits, a game-show pass button, sounds and voice, themes, fonts and layouts.</p>
+      </div>
+      <button class="btn" id="goAdvancedBtn" type="button">${svg("sliders")} Show all settings</button>
     </section>
   </div>
 
@@ -600,6 +617,15 @@ button { cursor: pointer; }
 .resume-text { flex: 1; min-width: 180px; display: flex; flex-direction: column; }
 .resume-text span { color: var(--muted); font-size: .88rem; }
 .resume-actions { display: flex; gap: 8px; }
+
+/* simple / advanced */
+.mode-bar { max-width: 1120px; margin: 0 auto 18px; display: flex; justify-content: center; }
+.mode-seg { flex-wrap: nowrap; border-radius: 99px; padding: 4px; }
+.mode-seg button { border-radius: 99px; padding: 9px 20px; font-size: .9rem; }
+[data-ui="simple"] .adv-only, [data-ui="advanced"] .simple-only { display: none !important; }
+.more-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.more-card h2 { margin-bottom: 4px; }
+.more-card .explain { margin: 0; max-width: 62ch; }
 
 /* cards */
 .cards { max-width: 1120px; margin: 0 auto; columns: 2 420px; column-gap: 18px; }
@@ -1118,7 +1144,7 @@ function clientApp() {
     passEnabled: false, passLabel: "Pass", passDuration: 5, passMaxUses: 0, passPauses: false, passEndsTurn: false,
     lowTimeEnabled: true, lowTimeThreshold: 10, showTenths: true,
     soundEnabled: true, soundPack: "classic", volume: 70, tickLast: true, voiceEnabled: false, vibrate: true,
-    theme: "midnight", font: "mono", layout: "auto", progress: "fill", dock: "auto", keepAwake: true, showMoves: true,
+    uiMode: "simple", theme: "midnight", font: "mono", layout: "auto", progress: "fill", dock: "auto", keepAwake: true, showMoves: true,
   };
   // Keys a preset / share link controls (everything about the rules, nothing about looks or sound).
   const RULE_KEYS = ["numPlayers", "baseMinutes", "baseSeconds", "perPlayerTimes", "timing", "increment", "byoPeriods", "byoSeconds",
@@ -1283,6 +1309,7 @@ function clientApp() {
     html.dataset.theme = settings.theme;
     html.dataset.font = settings.font;
     html.dataset.progress = settings.progress;
+    html.dataset.ui = settings.uiMode === "advanced" ? "advanced" : "simple";
     const meta = $('meta[name="theme-color"]');
     if (meta) meta.content = getComputedStyle(html).getPropertyValue("--bg").trim() || "#07090f";
   }
@@ -1502,7 +1529,7 @@ function clientApp() {
       if (value) settings.players.forEach((p) => { p.minutes = settings.baseMinutes; p.seconds = settings.baseSeconds; });
       renderPlayerList();
     }
-    if (key === "theme" || key === "font" || key === "progress") applyLook();
+    if (key === "theme" || key === "font" || key === "progress" || key === "uiMode") applyLook();
     if (key === "soundEnabled" && value) setTimeout(() => sfx("switch"), 30);
     if (key === "soundPack") setTimeout(() => sfx("switch"), 30);
     if (key === "voiceEnabled" && value) say("Voice announcer on");
@@ -1550,7 +1577,7 @@ function clientApp() {
     [1, 3, 5, 10, 15, 30, 60, 90].forEach((m) => {
       const b = document.createElement("button");
       b.type = "button"; b.className = "chip-btn"; b.dataset.m = m;
-      b.textContent = m < 60 ? m + "m" : m / 60 + (m % 60 ? ".5" : "") + "h";
+      b.textContent = m < 60 ? m + "m" : m / 60 + "h";
       b.onclick = () => { settings.baseSeconds = 0; setSetting("baseMinutes", m); };
       qt.appendChild(b);
     });
@@ -1579,6 +1606,7 @@ function clientApp() {
       toast(next.name + " theme", "palette");
     };
     $("#helpBtn").onclick = showShortcuts;
+    $("#goAdvancedBtn").onclick = () => { setSetting("uiMode", "advanced"); toast("All settings shown", "sliders"); };
     $("#testSound").onclick = () => { sfx("switch"); setTimeout(() => sfx("warn"), 350); setTimeout(() => sfx("buzz"), 900); };
     $("#shuffleBtn").onclick = () => {
       const a = settings.players;
