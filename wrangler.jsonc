@@ -3,6 +3,8 @@
   "name": "clock",
   "main": "src/worker.js",
   "compatibility_date": "2026-09-01",
+  // clientApp is shipped to the browser via toString(), so the bundler must not wrap it in __name() calls
+  "keep_names": false,
   "observability": { "enabled": true },
   "routes": [{ "pattern": "clock.mazzen.dev", "custom_domain": true }]
 }

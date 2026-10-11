@@ -2629,7 +2629,8 @@ function clientApp() {
 // ======================================================================
 
 function appJS() {
-  return "/* clock.mazzen.dev */\nconst ICONS = " + JSON.stringify(ICONS) + ";\n(" + clientApp.toString() + ")();\n";
+  // __name is defined in case a bundler (wrangler keepNames) injected __name() calls into clientApp
+  return "/* clock.mazzen.dev */\nvar __name = (f, n) => (Object.defineProperty(f, \"name\", { value: n, configurable: true }), f);\nconst ICONS = " + JSON.stringify(ICONS) + ";\n(" + clientApp.toString() + ")();\n";
 }
 
 const MANIFEST = JSON.stringify({
