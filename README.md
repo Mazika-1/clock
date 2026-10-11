@@ -18,7 +18,14 @@ The whole site is one Cloudflare Worker (`src/worker.js`) with no backend. Setti
 - Keeps the screen awake, fullscreen, keyboard shortcuts (press `?`), share-a-setup links, a live preview, and resume after a refresh.
 - Installable PWA that works offline.
 
-## Develop / deploy
+## Deploy
+
+Every push to `main` deploys to clock.mazzen.dev through GitHub Actions (`.github/workflows/deploy.yml`). The repo needs two secrets under Settings → Secrets and variables → Actions:
+
+- `CLOUDFLARE_API_TOKEN`: a token made from the "Edit Cloudflare Workers" template, with the mazzen.dev zone included
+- `CLOUDFLARE_ACCOUNT_ID`: shown on the right side of the Cloudflare dashboard's Workers page
+
+## Develop locally
 
 ```sh
 npx wrangler dev      # http://localhost:8787
