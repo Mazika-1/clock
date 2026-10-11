@@ -74,9 +74,13 @@ ${styleCSS()}
     <section class="card card-wide">
       <div class="card-head">
         <h2>${svg("bolt")} Presets</h2>
-        <button class="link-btn" id="savePresetBtn" type="button">${svg("plus")} Save current</button>
+        <div class="card-head-actions">
+          <button class="link-btn" id="editPresetsBtn" type="button">${svg("pencil")} Edit</button>
+          <button class="link-btn" id="savePresetBtn" type="button">${svg("plus")} Save current</button>
+        </div>
       </div>
       <div class="presets" id="presets"></div>
+      <div class="row-actions hidden" id="presetsFoot"></div>
     </section>
 
     <section class="card">
@@ -421,6 +425,7 @@ const ICONS = {
   trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0z"/>',
   star: '<path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
+  pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
 };
 
 function svg(name) {
@@ -730,8 +735,28 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: 0; bo
 .preset .pe { font-size: 1.25rem; line-height: 1; margin-bottom: 6px; }
 .preset .pn { font-weight: 700; font-size: .93rem; }
 .preset .ps { color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
-.preset .pdel { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); display: grid; place-items: center; opacity: .6; z-index: 1; }
-.preset .pdel:hover { opacity: 1; color: var(--danger); background: var(--surface-2); }
+.card-head-actions { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.link-btn.on { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.preset .pdel {
+  position: absolute; top: 7px; right: 7px; width: 28px; height: 28px; border-radius: 50%; z-index: 1;
+  display: grid; place-items: center; color: #fff; background: var(--danger); box-shadow: 0 4px 12px -4px var(--danger);
+  animation: pop .3s cubic-bezier(.3,1.6,.5,1);
+}
+.preset .pdel .i { width: 14px; height: 14px; }
+.preset .pdel:hover { filter: brightness(1.15); transform: scale(1.08); }
+.preset .pedit { position: absolute; bottom: 9px; right: 10px; color: var(--accent); opacity: .8; }
+.preset .pedit .i { width: 15px; height: 15px; }
+.presets.editing .preset { border-style: dashed; border-color: var(--line-2); animation: jiggle .5s ease-in-out infinite alternate; }
+.presets.editing .preset:hover { animation-play-state: paused; border-color: var(--accent); }
+@keyframes jiggle { from { transform: rotate(calc(var(--jig) * -1)); } to { transform: rotate(var(--jig)); } }
+.presets-empty { grid-column: 1 / -1; margin: 4px 2px; }
+.emoji-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.emoji-row button { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 1.25rem; transition: transform .12s, border-color .2s, background .2s; }
+.emoji-row button:hover { transform: scale(1.08); }
+.emoji-row button.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.pe-settings { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-weight: 600; }
+.toast-act { pointer-events: auto; margin-left: 6px; border: 0; padding: 5px 11px; border-radius: 9px; font-weight: 700; font-size: .85rem; background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--fg); }
+.toast-act:hover { background: color-mix(in srgb, var(--accent) 36%, transparent); }
 
 /* players list */
 .player-list { display: flex; flex-direction: column; gap: 8px; }
@@ -1081,6 +1106,7 @@ function clientApp() {
   const STORE = "clock.settings.v2";
   const GAME_STORE = "clock.game.v2";
   const PRESET_STORE = "clock.presets.v2";
+  const PRESET_MODS_STORE = "clock.presetmods.v2";
   const OLD_STORE = "clockmazzen.settings.v1";
   const MAX_PLAYERS = 10;
 
@@ -1347,13 +1373,20 @@ function clientApp() {
   // toasts, modal, confetti
   // ------------------------------------------------------------------
 
-  function toast(msg, ic) {
+  function toast(msg, ic, action) {
     const el = document.createElement("div");
     el.className = "toast";
     el.innerHTML = (ic ? icon(ic) : "") + "<span></span>";
     el.querySelector("span").textContent = msg;
+    const bye = () => { if (el.classList.contains("bye")) return; el.classList.add("bye"); setTimeout(() => el.remove(), 320); };
+    if (action) {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "toast-act"; b.textContent = action.label;
+      b.onclick = () => { action.fn(); bye(); };
+      el.appendChild(b);
+    }
     $("#toasts").appendChild(el);
-    setTimeout(() => { el.classList.add("bye"); setTimeout(() => el.remove(), 320); }, 2200);
+    setTimeout(bye, action ? 5000 : 2200);
   }
 
   const modal = $("#modal"), modalCard = $("#modalCard");
@@ -1556,7 +1589,8 @@ function clientApp() {
       settings.players.forEach((p, i) => { p.name = NAMES[i]; p.color = PALETTE[i % PALETTE.length]; });
       saveSettings(); renderPlayerList(); syncSetup();
     };
-    $("#savePresetBtn").onclick = savePresetDialog;
+    $("#savePresetBtn").onclick = () => savePresetDialog();
+    $("#editPresetsBtn").onclick = () => { presetEditing = !presetEditing; renderPresets(); };
     $("#shareBtn").onclick = shareLink;
     $("#resetBtn").onclick = () => {
       openModal(mHead("Reset everything?", "trash") +
@@ -1621,9 +1655,31 @@ function clientApp() {
   }
 
   // presets ------------------------------------------------------------
+  // Built-in presets can be renamed, re-pointed at new settings or hidden; those changes live in
+  // PRESET_MODS_STORE as { hidden: [id], overrides: { id: {e, name, sub, s} } }.
+  function loadPresetMods() {
+    try {
+      const m = JSON.parse(localStorage.getItem(PRESET_MODS_STORE) || "{}");
+      return { hidden: Array.isArray(m.hidden) ? m.hidden : [], overrides: m.overrides && typeof m.overrides === "object" ? m.overrides : {} };
+    } catch (_) { return { hidden: [], overrides: {} }; }
+  }
+  function savePresetMods(m) { try { localStorage.setItem(PRESET_MODS_STORE, JSON.stringify(m)); } catch (_) {} }
+  function allPresets() {
+    const mods = loadPresetMods();
+    const builtIn = PRESETS.filter((p) => !mods.hidden.includes(p.id))
+      .map((p) => Object.assign({}, p, mods.overrides[p.id] || {}, { builtIn: true, edited: !!mods.overrides[p.id] }));
+    return builtIn.concat(loadCustomPresets().map((c) => Object.assign({ e: "⭐" }, c, { custom: true })));
+  }
+  function currentRules() {
+    const s = {}; RULE_KEYS.forEach((k) => (s[k] = settings[k]));
+    s.players = clone(settings.players);
+    return s;
+  }
+  const currentSub = () => settings.numPlayers + "p · " + baseLabel();
+
   function presetMatches(s) {
     const full = Object.assign({}, PRESET_BASE, s);
-    return Object.keys(full).every((k) => settings[k] === full[k]);
+    return Object.keys(full).every((k) => k === "players" || settings[k] === full[k]);
   }
   function markPreset() {
     $$(".preset").forEach((el) => {
@@ -1641,49 +1697,163 @@ function clientApp() {
     saveSettings(); renderPlayerList(); syncSetup();
     sfx("switch");
   }
+  let presetEditing = false;
   function renderPresets() {
     const box = $("#presets");
     box.innerHTML = "";
-    const custom = loadCustomPresets();
-    const all = PRESETS.concat(custom.map((c) => Object.assign({ custom: true, e: "⭐" }, c)));
-    all.forEach((p) => {
+    box.classList.toggle("editing", presetEditing);
+    const eb = $("#editPresetsBtn");
+    eb.innerHTML = presetEditing ? icon("check") + " Done" : icon("pencil") + " Edit";
+    eb.classList.toggle("on", presetEditing);
+    const all = allPresets();
+    all.forEach((p, n) => {
       const b = document.createElement("button");
       b.type = "button"; b.className = "preset"; b._preset = p;
-      b.innerHTML = `<span class="pe">${p.e}</span><span class="pn">${esc(p.name)}</span><span class="ps">${esc(p.sub || "")}</span>` +
-        (p.custom ? `<span class="pdel" role="button" aria-label="Delete preset">${icon("close")}</span>` : "");
+      b.style.setProperty("--jig", (n % 2 ? -1 : 1) * 0.6 + "deg");
+      b.innerHTML = `<span class="pe">${esc(p.e)}</span><span class="pn">${esc(p.name)}</span><span class="ps">${esc(p.sub || "")}</span>` +
+        (presetEditing ? `<span class="pdel" role="button" aria-label="Delete ${esc(p.name)}">${icon("close")}</span><span class="pedit">${icon("pencil")}</span>` : "");
       b.addEventListener("pointermove", (e) => { const r = b.getBoundingClientRect(); b.style.setProperty("--mx", e.clientX - r.left + "px"); b.style.setProperty("--my", e.clientY - r.top + "px"); });
       b.onclick = (e) => {
-        if (e.target.closest(".pdel")) {
-          saveCustomPresets(loadCustomPresets().filter((c) => c.id !== p.id));
-          renderPresets(); toast("Preset deleted", "trash");
-          return;
-        }
+        if (e.target.closest(".pdel")) { deletePreset(p); return; }
+        if (presetEditing) { editPresetDialog(p); return; }
         applyPreset(p);
         toast(p.name + " loaded", "bolt");
       };
       box.appendChild(b);
     });
+    if (!all.length) {
+      const empty = document.createElement("p");
+      empty.className = "explain presets-empty";
+      empty.textContent = "No presets left. Save your current setup or restore the built-in ones.";
+      box.appendChild(empty);
+    }
+    const hidden = loadPresetMods().hidden.length;
+    const edited = Object.keys(loadPresetMods().overrides).length;
+    const foot = $("#presetsFoot");
+    foot.classList.toggle("hidden", !(presetEditing && (hidden || edited)));
+    foot.innerHTML = presetEditing && (hidden || edited)
+      ? `<button class="chip-btn" id="restorePresetsBtn" type="button">${icon("restart")} Restore built-in presets${hidden ? " (" + hidden + " hidden)" : ""}</button>`
+      : "";
+    const rb = $("#restorePresetsBtn");
+    if (rb) rb.onclick = () => {
+      const before = loadPresetMods();
+      savePresetMods({ hidden: [], overrides: {} });
+      renderPresets();
+      toast("Built-in presets restored", "restart", { label: "Undo", fn: () => { savePresetMods(before); renderPresets(); } });
+    };
     markPreset();
   }
-  function savePresetDialog() {
-    openModal(mHead("Save as preset", "star") + `
-      <div class="m-section"><div class="m-label">Name</div><input class="m-input" id="presetName" maxlength="28" placeholder="Friday poker night"></div>
-      <p class="explain" style="margin-top:0">Saves the rules, player names and colours: ${esc(settings.numPlayers + " players · " + baseLabel())}.</p>
-      <div class="m-actions"><button class="btn" data-close>Cancel</button><button class="btn primary" id="presetSave">${icon("check")} Save preset</button></div>`);
-    const inp = $("#presetName");
-    setTimeout(() => inp.focus(), 50);
-    const save = () => {
-      const name = inp.value.trim() || "My preset";
-      const s = {}; RULE_KEYS.forEach((k) => (s[k] = settings[k]));
-      s.players = clone(settings.players);
-      const list = loadCustomPresets();
-      list.push({ id: "c" + Date.now(), name, sub: settings.numPlayers + "p · " + baseLabel(), s });
-      saveCustomPresets(list);
-      closeModal(); renderPresets(); toast("Preset saved", "star");
-    };
-    $("#presetSave").onclick = save;
-    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") save(); });
+
+  function deletePreset(p) {
+    if (p.custom) {
+      const before = loadCustomPresets();
+      saveCustomPresets(before.filter((c) => c.id !== p.id));
+      renderPresets();
+      toast(p.name + " deleted", "trash", { label: "Undo", fn: () => { saveCustomPresets(before); renderPresets(); } });
+    } else {
+      const before = loadPresetMods();
+      const m = clone(before);
+      if (!m.hidden.includes(p.id)) m.hidden.push(p.id);
+      delete m.overrides[p.id];
+      savePresetMods(m);
+      renderPresets();
+      toast(p.name + " removed", "trash", { label: "Undo", fn: () => { savePresetMods(before); renderPresets(); } });
+    }
   }
+
+  function updatePreset(p, patch) {
+    if (p.custom) {
+      saveCustomPresets(loadCustomPresets().map((c) => (c.id === p.id ? Object.assign({}, c, patch) : c)));
+    } else {
+      const m = loadPresetMods();
+      const base = PRESETS.find((x) => x.id === p.id);
+      m.overrides[p.id] = Object.assign({ e: base.e, name: base.name, sub: base.sub, s: base.s }, m.overrides[p.id] || {}, patch);
+      savePresetMods(m);
+    }
+    renderPresets();
+  }
+
+  const PRESET_EMOJI = ["⭐", "⚡", "🔥", "♟️", "🎲", "🃏", "🎤", "🎙️", "🧠", "🏆", "⏱️", "🐢", "🚀", "🎯", "🍕", "👑"];
+
+  // One dialog for both "save current setup as a new preset" (p = null) and editing an existing one.
+  function editPresetDialog(p) {
+    const isNew = !p;
+    let draft = isNew
+      ? { e: "⭐", name: "", sub: currentSub(), s: currentRules() }
+      : { e: p.e, name: p.name, sub: p.sub || "", s: clone(p.s) };
+    const summary = (s) => {
+      const tmp = Object.assign({}, PRESET_BASE, s);
+      const n = tmp.numPlayers || settings.numPlayers;
+      return esc(n + " player" + (n > 1 ? "s" : "") + " · " + baseLabel(Object.assign({}, settings, tmp)));
+    };
+    const card = openModal(mHead(isNew ? "Save as preset" : "Edit preset", isNew ? "star" : "pencil") + `
+      <div class="m-section">
+        <div class="m-label">Icon</div>
+        <div class="emoji-row" id="peEmoji"></div>
+      </div>
+      <div class="m-section">
+        <div class="m-label">Name</div>
+        <input class="m-input" id="peName" maxlength="28" placeholder="Friday poker night">
+      </div>
+      <div class="m-section">
+        <div class="m-label">Subtitle</div>
+        <input class="m-input" id="peSub" maxlength="40" placeholder="Shown under the name">
+      </div>
+      <div class="m-section">
+        <div class="m-label">Settings in this preset</div>
+        <div class="pe-settings"><span id="peSummary">${summary(draft.s)}</span>
+          ${isNew ? "" : `<button class="chip-btn" id="peUseCurrent" type="button">${icon("sliders")} Use my current setup</button>`}</div>
+        <p class="explain" style="margin:8px 0 0">${isNew ? "Saves the rules, player names and colours you have set up right now." : "To change the rules, set things up below the way you want, then come back here and tap <b>Use my current setup</b>."}</p>
+      </div>
+      <div class="m-actions">
+        ${isNew ? `<button class="btn" data-close>Cancel</button>` : `<button class="btn danger" id="peDelete">${icon("trash")} Delete</button>`}
+        ${!isNew && p.edited ? `<button class="btn" id="peReset">${icon("restart")} Original</button>` : ""}
+        <button class="btn primary" id="peSave">${icon("check")} ${isNew ? "Save preset" : "Save changes"}</button>
+      </div>`);
+    const name = $("#peName", card), sub = $("#peSub", card);
+    name.value = draft.name; sub.value = draft.sub;
+    const er = $("#peEmoji", card);
+    const custom = !PRESET_EMOJI.includes(draft.e) ? [draft.e] : [];
+    custom.concat(PRESET_EMOJI).forEach((em) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = em;
+      b.className = em === draft.e ? "on" : "";
+      b.onclick = () => { draft.e = em; $$("button", er).forEach((x) => x.classList.toggle("on", x === b)); };
+      er.appendChild(b);
+    });
+    setTimeout(() => name.focus(), 50);
+    const use = $("#peUseCurrent", card);
+    if (use) use.onclick = () => {
+      draft.s = currentRules();
+      draft.sub = currentSub(); sub.value = draft.sub;
+      $("#peSummary", card).innerHTML = summary(draft.s);
+      use.innerHTML = icon("check") + " Updated";
+      use.classList.add("on");
+    };
+    const save = () => {
+      const patch = { e: draft.e, name: name.value.trim() || (isNew ? "My preset" : p.name), sub: sub.value.trim(), s: draft.s };
+      if (isNew) {
+        const list = loadCustomPresets();
+        list.push(Object.assign({ id: "c" + Date.now() }, patch));
+        saveCustomPresets(list);
+        toast("Preset saved", "star");
+      } else {
+        updatePreset(p, patch);
+        toast("Preset updated", "check");
+      }
+      closeModal(); renderPresets();
+    };
+    $("#peSave", card).onclick = save;
+    [name, sub].forEach((i) => i.addEventListener("keydown", (e) => { if (e.key === "Enter") save(); }));
+    const del = $("#peDelete", card);
+    if (del) del.onclick = () => { closeModal(); deletePreset(p); };
+    const rst = $("#peReset", card);
+    if (rst) rst.onclick = () => {
+      const m = loadPresetMods(); delete m.overrides[p.id]; savePresetMods(m);
+      closeModal(); renderPresets(); toast(p.name + " reset to original", "restart");
+    };
+  }
+  const savePresetDialog = () => editPresetDialog(null);
 
   // share links ---------------------------------------------------------
   function encodeShare() {
