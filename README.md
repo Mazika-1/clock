@@ -20,10 +20,7 @@ The whole site is one Cloudflare Worker (`src/worker.js`) with no backend. Setti
 
 ## Deploy
 
-Every push to `main` deploys to clock.mazzen.dev through GitHub Actions (`.github/workflows/deploy.yml`). The repo needs two secrets under Settings → Secrets and variables → Actions:
-
-- `CLOUDFLARE_API_TOKEN`: a token made from the "Edit Cloudflare Workers" template, with the mazzen.dev zone included
-- `CLOUDFLARE_ACCOUNT_ID`: shown on the right side of the Cloudflare dashboard's Workers page
+The repo is connected to Cloudflare Workers Builds, so every push to `main` deploys to clock.mazzen.dev.
 
 ## Develop locally
 
