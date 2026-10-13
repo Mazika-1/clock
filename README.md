@@ -18,6 +18,16 @@ The whole site is one Cloudflare Worker (`src/worker.js`) with no backend. Setti
 - Keeps the screen awake, fullscreen, keyboard shortcuts (press `?`), share-a-setup links, a live preview, and resume after a refresh.
 - Installable PWA that works offline.
 
+## Android app
+
+`android/` wraps the clock in an Android app that works with no internet: the
+pages and Google Fonts are bundled inside, and a small native bridge provides
+the voice announcer, vibration, keep-screen-on and fullscreen. Every push to
+`main` that touches `src/` or `android/` builds it in GitHub Actions and
+publishes it as a release:
+
+https://github.com/Mazika-1/clock/releases/latest/download/Clock.apk
+
 ## Deploy
 
 The repo is connected to Cloudflare Workers Builds, so every push to `main` deploys to clock.mazzen.dev.

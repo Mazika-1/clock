@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The site's 512x512 clock glyph, centred in the adaptive-icon safe zone -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="768"
+    android:viewportHeight="768">
+    <group android:translateX="128" android:translateY="100">
+        <path
+            android:pathData="M256,146a136,136 0 1,1 0,272a136,136 0 1,1 0,-272z"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="36" />
+        <path
+            android:pathData="M256,210L256,282L304,314"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="36"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M226,78h60a20,20 0 0,1 0,40h-60a20,20 0 0,1 0,-40z"
+            android:fillColor="#FFFFFF" />
+    </group>
+</vector>

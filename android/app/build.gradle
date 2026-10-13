@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+// CI passes the run number so every build installs over the last one.
+def buildNumber = (project.findProperty('buildNumber') ?: '1') as Integer
+
+android {
+    namespace 'dev.mazzen.clock'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "dev.mazzen.clock"
+        minSdk 26
+        targetSdk 34
+        versionCode buildNumber
+        versionName "1.0." + buildNumber
+    }
+
+    // Fixed debug key (committed on purpose, it is the standard public
+    // Android debug key) so every CI build is signed the same way and new
+    // versions install over the old one without uninstalling.
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {}
