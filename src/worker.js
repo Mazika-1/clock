@@ -35,6 +35,20 @@ ${styleCSS()}
 </style>
 </head>
 <body>
+<!-- mazzen.dev home button: the same on every mazzen.dev site (top left, styled like the settings gear) -->
+<style>
+.mz-home { position: fixed; z-index: 950; top: calc(12px + env(safe-area-inset-top)); left: calc(12px + env(safe-area-inset-left));
+  width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; text-decoration: none;
+  color: #15171c; background: rgba(255,255,255,.82); border: 1px solid rgba(20,20,30,.12);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 6px 20px -8px rgba(0,0,0,.35); transition: transform .2s ease, border-color .2s; }
+.mz-home:hover { transform: translateY(-1px); border-color: #5b6cff; }
+.mz-home svg { width: 20px; height: 20px; }
+@media (prefers-color-scheme: dark) { .mz-home { color: #eef0f6; background: rgba(20,22,30,.78); border-color: rgba(255,255,255,.12); } }
+@media print { .mz-home { display: none !important; } }
+/* clock: room before the logo on phones */
+@media (max-width: 760px) { .s-head { padding-left: 52px; } }
+</style>
+<a class="mz-home" href="https://mazzen.dev/" title="mazzen.dev: all the sites" aria-label="mazzen.dev home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></a>
 
 <!-- ======================= SETUP ======================= -->
 <main id="setup" class="setup">
