@@ -412,6 +412,7 @@ ${styleCSS()}
 <canvas id="confetti" class="confetti"></canvas>
 
 <script src="/app.js" defer></script>
+<script src="https://mazzen.dev/stats/t.js" async></script>
 </body>
 </html>`;
 }
