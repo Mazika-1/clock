@@ -12,6 +12,7 @@
 //   /icon.svg              app icon
 //   /sw.js                 service worker — the clock keeps working offline
 
+import { withGate } from "./gate.js";
 function pageHTML() {
   return `<!DOCTYPE html>
 <html lang="en" data-theme="midnight" data-font="mono">
@@ -2898,7 +2899,7 @@ function respond(body, type, extra) {
   });
 }
 
-export default {
+const site = {
   async fetch(request) {
     const url = new URL(request.url);
     switch (url.pathname) {
@@ -2919,3 +2920,6 @@ export default {
     }
   },
 };
+
+// behind the mazzen.dev site-wide password (src/gate.js; switched on and off on mazzen.dev/stats)
+export default { ...site, fetch: (req, env, ctx) => withGate(req, env, ctx, (r, e, c) => site.fetch(r, e, c)) };
