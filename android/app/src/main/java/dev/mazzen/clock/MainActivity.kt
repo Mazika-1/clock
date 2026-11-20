@@ -112,6 +112,8 @@ class MainActivity : Activity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (fullscreen) { setFullscreen(false); return }
+        // back from a custom time or settings to the list (the page keeps them as history entries)
+        if (webView.canGoBack()) { webView.goBack(); return }
         @Suppress("DEPRECATION")
         super.onBackPressed()
     }

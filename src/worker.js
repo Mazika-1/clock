@@ -29,7 +29,7 @@ function pageHTML() {
 <link rel="apple-touch-icon" href="/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@500;700&family=Orbitron:wght@600;800&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@500;700&family=Orbitron:wght@600;800&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Roboto:wght@400;500;700&family=Montserrat:wght@800&display=swap">
 <title>Clock · mazzen.dev</title>
 <style>
 ${styleCSS()}
@@ -53,6 +53,12 @@ ${styleCSS()}
 
 <!-- ======================= SETUP ======================= -->
 <main id="setup" class="setup">
+  <header class="pl-bar plain-only">
+    <button class="pl-icon pl-back" id="plBack" type="button" aria-label="Back">${svg("back")}</button>
+    <h1 class="pl-title" id="plTitle">Time Controls</h1>
+    <button class="pl-icon pl-listonly" id="plEdit" type="button" aria-label="Edit presets">${svg("pencil")}</button>
+    <button class="pl-icon pl-listonly" id="plGear" type="button" aria-label="Settings">${svg("gear")}</button>
+  </header>
   <header class="s-head">
     <a class="logo" href="/" aria-label="clock.mazzen.dev">
       <span class="logo-mark">${ICON_MARK}</span>
@@ -93,7 +99,11 @@ ${styleCSS()}
 
   <div class="cards">
 
-    <section class="card card-wide">
+    <section class="card card-wide pl-presets">
+      <div class="plain-only pl-top">
+        <button class="pl-new" id="plNew" type="button">${svg("plus")} New Custom Time</button>
+        <div class="pl-label">Presets</div>
+      </div>
       <div class="card-head">
         <h2>${svg("bolt")} Presets</h2>
         <div class="card-head-actions">
@@ -105,7 +115,7 @@ ${styleCSS()}
       <div class="row-actions hidden" id="presetsFoot"></div>
     </section>
 
-    <section class="card">
+    <section class="card pl-rules">
       <div class="card-head">
         <h2>${svg("users")} Players</h2>
         <div class="stepper" data-step="numPlayers" data-min="1" data-max="10">
@@ -125,7 +135,7 @@ ${styleCSS()}
       </label>
     </section>
 
-    <section class="card">
+    <section class="card pl-rules">
       <h2>${svg("clock")} Time control</h2>
       <div class="time-big" data-show="!perPlayerTimes&amp;timing!=countup">
         <label><input type="number" inputmode="numeric" min="0" max="999" data-bind="baseMinutes" aria-label="Minutes"><span>min</span></label>
@@ -163,7 +173,7 @@ ${styleCSS()}
       </div>
     </section>
 
-    <section class="card adv-only">
+    <section class="card adv-only pl-rules">
       <h2>${svg("route")} Turns</h2>
       <div class="field col">
         <span><b>Turn order</b></span>
@@ -213,7 +223,7 @@ ${styleCSS()}
       </div>
     </section>
 
-    <section class="card adv-only">
+    <section class="card adv-only pl-rules">
       <h2>${svg("mic")} Game-show pass</h2>
       <label class="field toggle">
         <span><b>Pass button</b><small>Shows a big countdown, e.g. "Pass! 5… 4… 3…"</small></span>
@@ -245,7 +255,7 @@ ${styleCSS()}
       </div>
     </section>
 
-    <section class="card adv-only">
+    <section class="card adv-only pl-prefs">
       <h2>${svg("bell")} Alerts</h2>
       <label class="field toggle" data-show="timing!=countup">
         <span><b>Low-time warning</b><small>Clock pulses red</small></span>
@@ -291,13 +301,24 @@ ${styleCSS()}
       </label>
     </section>
 
-    <section class="card card-wide adv-only">
-      <h2>${svg("sparkle")} Look &amp; feel</h2>
+    <section class="card card-wide pl-prefs look-card">
+      <h2>${svg("sparkle")} Style</h2>
       <div class="field col">
+        <div class="seg" data-bind="look" role="radiogroup" aria-label="Style">
+          <button type="button" data-v="plain">Plain</button>
+          <button type="button" data-v="classic">Classic</button>
+        </div>
+        <small class="explain">Plain is the flat, simple look. Classic is the original colourful one, with its themes and fonts.</small>
+      </div>
+    </section>
+
+    <section class="card card-wide adv-only pl-prefs classic-look">
+      <h2>${svg("sparkle")} Look &amp; feel</h2>
+      <div class="field col classic-only">
         <span><b>Theme</b></span>
         <div class="themes" id="themes"></div>
       </div>
-      <div class="field col">
+      <div class="field col classic-only">
         <span><b>Clock font</b></span>
         <div class="fonts" id="fonts"></div>
       </div>
@@ -311,7 +332,7 @@ ${styleCSS()}
           </div>
           <small class="explain" id="layoutExplain"></small>
         </div>
-        <div class="field col">
+        <div class="field col classic-only">
           <span><b>Time remaining</b></span>
           <div class="seg" data-bind="progress">
             <button type="button" data-v="fill">Liquid</button>
@@ -339,7 +360,7 @@ ${styleCSS()}
       </label>
     </section>
 
-    <section class="card card-wide share-card adv-only">
+    <section class="card card-wide share-card adv-only pl-prefs">
       <div>
         <h2>${svg("link")} Share this setup</h2>
         <p class="explain">Send a link with these exact settings so friends can open the same clock.</p>
@@ -350,7 +371,7 @@ ${styleCSS()}
       </div>
     </section>
 
-    <section class="card card-wide simple-only more-card">
+    <section class="card card-wide simple-only more-card pl-prefs">
       <div>
         <h2>${svg("sliders")} Want more control?</h2>
         <p class="explain">Advanced adds timing modes (increment, delay, byo-yomi…), turn order, move time limits, a game-show pass button, sounds and voice, themes, fonts and layouts.</p>
@@ -364,6 +385,7 @@ ${styleCSS()}
     <button class="btn-start" id="startBtn" type="button">
       <span>Start</span>${svg("arrow")}
     </button>
+    <button class="pl-save plain-only" id="plSave" type="button">Save</button>
   </footer>
 </main>
 
@@ -421,6 +443,8 @@ ${styleCSS()}
 // ---------- icons (inline SVG, stroke = currentColor) ----------
 
 const ICONS = {
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  back: '<path d="M20 12H5M11 5l-7 7 7 7"/>',
   palette: '<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.29-.29-.44-.65-.44-1.13a1.64 1.64 0 0 1 1.67-1.67h2c3.05 0 5.56-2.5 5.56-5.55C21.97 6.01 17.46 2 12 2z"/>',
   keyboard: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M10 13h4M7 16.5h10"/>',
   play: '<path d="M7 4.5v15a1 1 0 0 0 1.53.85l12-7.5a1 1 0 0 0 0-1.7l-12-7.5A1 1 0 0 0 7 4.5z" fill="currentColor" stroke="none"/>',
@@ -1123,6 +1147,190 @@ kbd { font: 700 .75rem "JetBrains Mono", monospace; padding: 3px 7px; border-rad
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+/* ===================== the plain look (the default) =====================
+   Flat Material, laid out and coloured after the Chess.com Chess Clock app (its source is public:
+   github.com/ChessCom/android-chessclock): window #262421, bars #312e2b, the running clock green
+   #7fa650, the waiting one grey #8b8987, red when time runs out, Roboto, 4px corners, no glow.
+   Settings → Style → Classic brings back the original look. */
+.plain-only, .p-moves { display: none; }
+[data-look="plain"] .classic-only { display: none !important; }
+[data-look="plain"] {
+  --bg: #262421; --bg-glow-1: transparent; --bg-glow-2: transparent;
+  --surface: #2f2c29; --surface-2: #3d3a37; --surface-solid: #312e2b;
+  --line: #4b4847; --line-2: #666564;
+  --fg: #fff; --muted: rgba(255,255,255,.5); --faint: #8b8987;
+  --accent: #7fa650; --accent-2: #7fa650; --on-accent: #fff;
+  --danger: #ed3239; --warn: #e58f2a; --ok: #7fa650;
+  --panel: #8b8987; --board: #312e2b; --glow: 0;
+  --clock-font: "Roboto", system-ui, sans-serif; --clock-weight: 700; --clock-track: 0;
+  color-scheme: dark;
+}
+[data-look="plain"] body { font: 16px/1.4 "Roboto", system-ui, sans-serif; background: #262421; }
+[data-look="plain"] * { animation-name: none; }
+[data-look="plain"] .tag.go, [data-look="plain"] .panel.bump .p-time { animation: none; }
+
+/* home link: flat, inside the top bar on the list screen */
+[data-look="plain"] .mz-home { top: calc(8px + env(safe-area-inset-top)); left: 4px; border: 0; border-radius: 50%; background: none; color: #fff; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+[data-look="plain"]:not([data-pview="list"]) .mz-home, [data-look="plain"] body:has(#game:not(.hidden)) .mz-home { display: none; }
+
+/* top bar */
+[data-look="plain"] .pl-bar {
+  display: flex; align-items: center; gap: 4px; position: sticky; top: 0; z-index: 30;
+  height: calc(56px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 4px 0;
+  background: #312e2b; box-shadow: 0 2px 4px rgba(0,0,0,.4);
+}
+.pl-title { flex: 1; margin: 0 0 0 12px; font: 500 20px/1 "Roboto", system-ui, sans-serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-pview="list"] .pl-title { margin-left: 52px; }
+.pl-icon { width: 48px; height: 48px; flex: none; border: 0; border-radius: 50%; background: none; color: #fff; display: grid; place-items: center; }
+.pl-icon .i { width: 24px; height: 24px; }
+.pl-icon:active { background: rgba(255,255,255,.12); }
+.pl-icon.on { color: #7fa650; }
+[data-pview="list"] .pl-back { display: none; }
+[data-look="plain"]:not([data-pview="list"]) .pl-listonly { display: none; }
+
+/* the setup page as plain lists */
+[data-look="plain"] .setup { padding: 0 0 104px; background: #262421; }
+[data-look="plain"] .s-head, [data-look="plain"] .hero { display: none; }
+[data-look="plain"] .mode-bar { display: none; }
+[data-look="plain"][data-pview="custom"] .mode-bar { display: flex; justify-content: flex-start; max-width: 600px; margin: 16px auto 0; padding: 0 16px; }
+[data-look="plain"]:not([data-pview="list"]) .resume-card { display: none !important; }
+[data-look="plain"] .resume-card { max-width: 600px; margin: 16px; border-radius: 4px; border: 0; background: #312e2b; }
+[data-look="plain"] .resume-pulse { display: none; }
+[data-look="plain"] .cards { columns: auto; max-width: 600px; margin: 0 auto; }
+[data-look="plain"] .card { margin: 0; padding: 16px; border: 0; border-bottom: 1px solid #4b4847; border-radius: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; animation: none; }
+[data-look="plain"][data-pview="list"] .card:not(.pl-presets),
+[data-look="plain"][data-pview="custom"] .card:not(.pl-rules),
+[data-look="plain"][data-pview="settings"] .card:not(.pl-prefs) { display: none !important; }
+[data-look="plain"] .card h2 { font: 400 14px/1.2 "Roboto", system-ui, sans-serif; color: #a9a8a6; margin: 0 0 8px; letter-spacing: 0; }
+[data-look="plain"] .card h2 .i { display: none; }
+[data-look="plain"] .card-head { margin-bottom: 8px; }
+[data-look="plain"] .field { min-height: 48px; padding: 10px 0; border-top: 1px solid #4b4847; }
+[data-look="plain"] .field b { font-weight: 400; font-size: 16px; }
+[data-look="plain"] .field small, [data-look="plain"] .explain { color: rgba(255,255,255,.5); font-size: 14px; }
+
+/* controls: Material switches, flat tabs, square-ish buttons */
+[data-look="plain"] .switch { width: 36px; height: 14px; border: 0; border-radius: 7px; background: #666564; overflow: visible; }
+[data-look="plain"] .switch::before { top: -3px; left: -2px; width: 20px; height: 20px; background: #e7e6e5; opacity: 1; box-shadow: 0 1px 3px rgba(0,0,0,.5); transition: transform .15s; }
+[data-look="plain"] .switch:checked { background: rgba(127,166,80,.55); }
+[data-look="plain"] .switch:checked::before { transform: translateX(18px); background: #7fa650; }
+[data-look="plain"] .seg { gap: 0; padding: 0; border-radius: 4px; background: none; border: 1px solid #4b4847; overflow: hidden; }
+[data-look="plain"] .seg button { border-radius: 0; padding: 10px 12px; color: rgba(255,255,255,.6); box-shadow: none; }
+[data-look="plain"] .seg button.on { background: #7fa650; color: #fff; box-shadow: none; }
+[data-look="plain"] .seg button.on .i { color: #fff; }
+[data-look="plain"] .stepper { padding: 0; gap: 0; border-radius: 4px; background: none; border: 1px solid #4b4847; }
+[data-look="plain"] .stepper button { border-radius: 0; background: none; color: #fff; }
+[data-look="plain"] .stepper button:active { background: rgba(255,255,255,.1); }
+[data-look="plain"] input[type="number"], [data-look="plain"] .text-in, [data-look="plain"] .m-input, [data-look="plain"] .p-row input[type="text"] { background: #000; border: 0; border-radius: 4px; }
+[data-look="plain"] input[type="number"]:focus, [data-look="plain"] .text-in:focus, [data-look="plain"] .m-input:focus, [data-look="plain"] .p-row input:focus { box-shadow: 0 0 0 2px #7fa650; }
+[data-look="plain"] .btn, [data-look="plain"] .chip-btn, [data-look="plain"] .icon-btn { border-radius: 4px; box-shadow: none; }
+[data-look="plain"] .btn.primary { background: #7fa650; color: #fff; box-shadow: none; text-transform: uppercase; font-size: 14px; letter-spacing: .03em; }
+[data-look="plain"] .btn.big { border-radius: 4px; }
+[data-look="plain"] .link-btn { color: #7fa650; border-radius: 4px; }
+[data-look="plain"] .p-row { border-radius: 0; background: none; border: 0; border-bottom: 1px solid #4b4847; }
+[data-look="plain"] .p-swatch { border-radius: 50%; box-shadow: none; }
+
+/* the time controls list */
+[data-look="plain"] .pl-presets { padding: 0; border: 0; }
+[data-look="plain"] .pl-presets .card-head { display: none; }
+[data-look="plain"] .pl-top { display: block; padding: 24px 16px 0; text-align: center; }
+.pl-new { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 22px 0 18px; border: 1px solid rgba(255,255,255,.65); border-radius: 20px; background: none; color: #fff; font: 400 16px "Roboto", system-ui, sans-serif; }
+.pl-new .i { color: #7fa650; width: 20px; height: 20px; }
+.pl-new:active { background: rgba(255,255,255,.08); }
+.pl-label { margin: 24px 0 4px; text-align: left; font-size: 14px; color: #a9a8a6; }
+[data-look="plain"] .presets { display: block; }
+[data-look="plain"] .preset {
+  display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; min-height: 48px; padding: 0 16px; margin: 0;
+  border: 0; border-radius: 0; background: none; box-shadow: none; text-align: left; color: #fff; transform: none;
+}
+[data-look="plain"] .preset::after { content: ""; position: static; inset: auto; flex: none; margin-left: auto; width: 20px; height: 20px; box-sizing: border-box; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); background: none; opacity: 1; }
+[data-look="plain"] .preset.on::after { border-color: #7fa650; background: radial-gradient(circle, #7fa650 0 4px, transparent 4.5px); }
+[data-look="plain"] .preset:hover { transform: none; }
+[data-look="plain"] .preset:active { background: rgba(255,255,255,.06); }
+[data-look="plain"] .preset.on { background: none; box-shadow: none; }
+[data-look="plain"] .preset .pe { display: none; }
+[data-look="plain"] .preset .pn { font: 400 16px "Roboto", system-ui, sans-serif; }
+[data-look="plain"] .preset .ps { font-size: 14px; color: rgba(255,255,255,.5); }
+[data-look="plain"] .presets.editing .preset { animation: none; border: 0; }
+[data-look="plain"] .presets.editing .preset::after { display: none; }
+[data-look="plain"] .preset .pdel { position: static; order: -1; width: 24px; height: 24px; box-shadow: none; animation: none; }
+[data-look="plain"] .preset .pedit { position: static; margin-left: auto; color: rgba(255,255,255,.7); }
+[data-look="plain"] .presets-empty { padding: 8px 16px; }
+
+/* the bottom bar: a big green Start on the list, SAVE on a custom time */
+[data-look="plain"] .start-bar {
+  left: 0; right: 0; bottom: 0; width: auto; transform: none; display: block; padding: 8px 16px calc(14px + env(safe-area-inset-bottom));
+  border: 0; border-radius: 0; background: #262421; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+[data-look="plain"] .start-summary { display: none; }
+[data-look="plain"] .btn-start {
+  display: flex; align-items: center; justify-content: center; width: 100%; max-width: 600px; height: 56px; margin: 0 auto;
+  border: 0; border-radius: 10px; background: #7fa650; color: #fff; box-shadow: 0 4px 0 #5f7d3c;
+  font: 800 22px/1 "Montserrat", "Roboto", sans-serif; text-shadow: 0 1px 1px rgba(0,0,0,.65); animation: none;
+}
+[data-look="plain"] .btn-start::after, [data-look="plain"] .btn-start .i { display: none; }
+[data-look="plain"] .btn-start:hover { filter: none; box-shadow: 0 4px 0 #5f7d3c; }
+[data-look="plain"] .btn-start:active { transform: translateY(2px); box-shadow: 0 2px 0 #5f7d3c; }
+[data-look="plain"]:not([data-pview="list"]) .btn-start { display: none; }
+[data-look="plain"][data-pview="settings"] .start-bar { display: none; }
+.pl-save { width: 100%; max-width: 600px; height: 40px; margin: 0 auto; border: 0; border-radius: 4px; background: #7fa650; color: #fff; font: 700 14px "Roboto", system-ui, sans-serif; text-transform: uppercase; letter-spacing: .04em; }
+.pl-save:active { filter: brightness(.9); }
+[data-look="plain"][data-pview="custom"] .pl-save { display: block; }
+
+/* the clock: edge-to-edge halves, grey waiting, green running, red out; the control bar between */
+[data-look="plain"] .game { background: #312e2b; }
+[data-look="plain"] .board { gap: 1px; padding: 0; }
+[data-look="plain"] .b-row { gap: 1px; }
+[data-look="plain"] .game[data-dock="center"][data-rows="2"] .board { gap: 56px; }
+[data-look="plain"] .game[data-dock="bottom"] .board { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+[data-look="plain"] .panel { border-radius: 0; background: #8b8987; box-shadow: none !important; transition: background .12s; }
+[data-look="plain"] .panel::after, [data-look="plain"] .panel .fill, [data-look="plain"] .panel .bar, [data-look="plain"] .panel .ring { display: none !important; }
+[data-look="plain"] .panel.active { background: #7fa650; }
+[data-look="plain"] .panel.out { background: #ed3239; filter: none; opacity: 1; }
+[data-look="plain"] .panel.out .p-time { text-decoration: none; }
+[data-look="plain"] .panel.low { animation: none; }
+[data-look="plain"] .panel.waiting .p-time { opacity: 1; }
+[data-look="plain"] .p-time, [data-look="plain"] .panel.low .p-time, [data-look="plain"] .panel.overtime .p-time { color: rgba(0,0,0,.7); text-shadow: none !important; }
+[data-look="plain"] .panel.active .p-time, [data-look="plain"] .panel.active.low .p-time { color: #fff; }
+[data-look="plain"] .p-head { color: rgba(0,0,0,.55); font: 500 17px "Roboto", system-ui, sans-serif; }
+[data-look="plain"] .panel.active .p-head { color: rgba(255,255,255,.9); }
+[data-look="plain"] .p-head .dot { box-shadow: none; }
+[data-look="plain"] .game[data-n="2"] .p-head { display: none; }
+[data-look="plain"] .tag { background: none !important; color: rgba(0,0,0,.55) !important; padding: 0 .3em; box-shadow: none; animation: none; }
+[data-look="plain"] .panel.active .tag { color: rgba(255,255,255,.9) !important; }
+[data-look="plain"] .tag.mv { display: none; }
+[data-look="plain"] .p-moves { display: block; position: absolute; top: 16px; right: 16px; font: 700 16px "Roboto", system-ui, sans-serif; color: rgba(0,0,0,.4); pointer-events: none; }
+[data-look="plain"] .p-menu { top: auto; bottom: 8px; right: 8px; border-radius: 50%; color: rgba(0,0,0,.5); opacity: 1; }
+[data-look="plain"] .p-menu:hover { background: rgba(0,0,0,.08); }
+[data-look="plain"] .p-seatno { color: rgba(0,0,0,.45); top: 16px; left: 16px; font-size: 16px; }
+[data-look="plain"] .p-pass { border: 2px solid rgba(0,0,0,.45); border-radius: 4px; background: none; color: inherit; }
+[data-look="plain"] .ripple { background: rgba(255,255,255,.25); }
+[data-look="plain"] .dock {
+  left: 0; right: 0; bottom: 0; width: 100%; transform: none; height: calc(56px + env(safe-area-inset-bottom)); padding: 0 0 env(safe-area-inset-bottom);
+  gap: 0; justify-content: space-evenly; border: 0; border-radius: 0; background: #312e2b; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; opacity: 1;
+}
+[data-look="plain"] .dock.center { top: 50%; bottom: auto; height: 56px; padding: 0; transform: translateY(-50%); }
+[data-look="plain"] .dock-info { display: none; }
+[data-look="plain"] .dock-btn { width: 48px; height: 48px; border-radius: 50%; background: none; color: #fff; }
+[data-look="plain"] .dock-btn .i { width: 26px; height: 26px; }
+[data-look="plain"] .dock-btn:hover { background: none; }
+[data-look="plain"] .dock-btn:active { background: rgba(255,255,255,.12); transform: none; }
+[data-look="plain"] .dock-btn.primary { background: none; color: #7fa650; }
+[data-look="plain"] .paused-overlay { background: rgba(38,36,33,.94); backdrop-filter: none; -webkit-backdrop-filter: none; }
+[data-look="plain"] .paused-label { font: 500 40px/1 "Roboto", system-ui, sans-serif; background: none; color: #fff; -webkit-text-fill-color: #fff; }
+
+/* dialogs and messages */
+[data-look="plain"] .modal-backdrop { background: rgba(0,0,0,.6); backdrop-filter: none; -webkit-backdrop-filter: none; }
+[data-look="plain"] .modal-card { border: 0; border-radius: 4px; background: #312e2b; box-shadow: 0 8px 24px rgba(0,0,0,.6); }
+[data-look="plain"] .m-head h3 { font: 500 20px "Roboto", system-ui, sans-serif; }
+/* messages as a snackbar at the bottom, clear of the top bar */
+[data-look="plain"] .toasts { top: auto; bottom: calc(96px + env(safe-area-inset-bottom)); }
+/* the settings screen always shows every preference (Simple/Advanced only shapes a custom time) */
+[data-look="plain"][data-pview="settings"] .card.pl-prefs.adv-only { display: block !important; }
+[data-look="plain"][data-pview="settings"] .card.pl-prefs.share-card { display: flex !important; }
+[data-look="plain"][data-pview="settings"] .more-card { display: none !important; }
+[data-look="plain"][data-pview="settings"] .pl-prefs .adv-only { display: revert !important; }
+[data-look="plain"] .toast { border: 0; border-radius: 4px; background: #4b4847; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: 0 3px 8px rgba(0,0,0,.5); }
 `;
 }
 
@@ -1161,6 +1369,7 @@ function clientApp() {
     lowTimeEnabled: true, lowTimeThreshold: 10, showTenths: true,
     soundEnabled: true, soundPack: "classic", volume: 70, tickLast: true, voiceEnabled: false, vibrate: true,
     uiMode: "simple", theme: "midnight", font: "mono", layout: "auto", progress: "fill", dock: "auto", keepAwake: true, showMoves: true,
+    look: "plain",
   };
   // Keys a preset / share link controls (everything about the rules, nothing about looks or sound).
   const RULE_KEYS = ["numPlayers", "baseMinutes", "baseSeconds", "perPlayerTimes", "timing", "increment", "byoPeriods", "byoSeconds",
@@ -1326,6 +1535,8 @@ function clientApp() {
     html.dataset.font = settings.font;
     html.dataset.progress = settings.progress;
     html.dataset.ui = settings.uiMode === "advanced" ? "advanced" : "simple";
+    html.dataset.look = settings.look === "classic" ? "classic" : "plain";
+    if (!html.dataset.pview) html.dataset.pview = "list";
     const meta = $('meta[name="theme-color"]');
     if (meta) meta.content = getComputedStyle(html).getPropertyValue("--bg").trim() || "#07090f";
   }
@@ -1545,7 +1756,7 @@ function clientApp() {
       if (value) settings.players.forEach((p) => { p.minutes = settings.baseMinutes; p.seconds = settings.baseSeconds; });
       renderPlayerList();
     }
-    if (key === "theme" || key === "font" || key === "progress" || key === "uiMode") applyLook();
+    if (key === "theme" || key === "font" || key === "progress" || key === "uiMode" || key === "look") applyLook();
     if (key === "soundEnabled" && value) setTimeout(() => sfx("switch"), 30);
     if (key === "soundPack") setTimeout(() => sfx("switch"), 30);
     if (key === "voiceEnabled" && value) say("Voice announcer on");
@@ -1752,6 +1963,7 @@ function clientApp() {
     const eb = $("#editPresetsBtn");
     eb.innerHTML = presetEditing ? icon("check") + " Done" : icon("pencil") + " Edit";
     eb.classList.toggle("on", presetEditing);
+    const pe = $("#plEdit"); if (pe) { pe.innerHTML = icon(presetEditing ? "check" : "pencil"); pe.classList.toggle("on", presetEditing); }
     const all = allPresets();
     all.forEach((p, n) => {
       const b = document.createElement("button");
@@ -1891,6 +2103,7 @@ function clientApp() {
         toast("Preset updated", "check");
       }
       closeModal(); renderPresets();
+      if (opts.onSave) opts.onSave();
     };
     $("#peSave", card).onclick = save;
     [name, sub].forEach((i) => i.addEventListener("keydown", (e) => { if (e.key === "Enter") save(); }));
@@ -1903,6 +2116,31 @@ function clientApp() {
     };
   }
   const savePresetDialog = () => editPresetDialog(null);
+
+  // the plain look's screens ----------------------------------------------
+  // "list" (presets and Start), "custom" (the rules, saved as a new preset) and "settings". Each
+  // one past the list is a history entry, so the browser's (and the phone's) back button works.
+  const PVIEW_TITLE = { list: "Time Controls", custom: "Custom Time", settings: "Settings" };
+  function setPView(v, push = true) {
+    const html = document.documentElement;
+    if (html.dataset.pview === v) return;
+    if (push && v !== "list") history.pushState({ pview: v }, "");
+    html.dataset.pview = v;
+    $("#plTitle").textContent = PVIEW_TITLE[v];
+    if (v === "list" && presetEditing) { presetEditing = false; renderPresets(); }
+    scrollTo(0, 0);
+  }
+  addEventListener("popstate", () => setPView((history.state && history.state.pview) || "list", false));
+  function bindPlain() {
+    $("#plBack").onclick = () => (history.state && history.state.pview ? history.back() : setPView("list", false));
+    $("#plEdit").onclick = () => $("#editPresetsBtn").click();
+    $("#plGear").onclick = () => setPView("settings");
+    $("#plNew").onclick = () => setPView("custom");
+    $("#plSave").onclick = () => editPresetDialog(null, { title: "Save time control", onSave: () => $("#plBack").click() });
+    // after a reload the browser is still on the screen it was on: show that one
+    const was = history.state && history.state.pview;
+    if (was) setPView(was, false);
+  }
 
   // share links ---------------------------------------------------------
   function encodeShare() {
@@ -2352,7 +2590,9 @@ function clientApp() {
   function renderBoard() {
     if (!game) return;
     const n = game.players.length;
-    const rows = layoutRows(n, game.cfg.layout, board.clientWidth || innerWidth, board.clientHeight || innerHeight);
+    const bw = board.clientWidth || innerWidth, bh = board.clientHeight || innerHeight;
+    const mode = settings.look !== "classic" && game.cfg.layout === "auto" && n === 2 && bh >= bw ? "table" : game.cfg.layout;
+    const rows = layoutRows(n, mode, bw, bh);
     board.innerHTML = "";
     panels = new Array(n);
     rows.forEach((r) => {
@@ -2367,6 +2607,9 @@ function clientApp() {
     });
     const dockPos = settings.dock === "auto" ? (n === 2 && rows.length === 2 ? "center" : "bottom") : settings.dock;
     dock.classList.toggle("center", dockPos === "center");
+    gameEl.dataset.dock = dockPos;
+    gameEl.dataset.rows = rows.length;
+    gameEl.dataset.n = n;
     updateUI(true);
   }
 
@@ -2386,11 +2629,13 @@ function clientApp() {
         <div class="p-meta"></div>
         ${game.cfg.passEnabled ? `<button class="p-pass" type="button"></button>` : ""}
       </div>
+      <div class="p-moves"></div>
       <button class="p-menu" type="button" aria-label="Player options">${icon("dots")}</button>`;
     $(".nm", el).textContent = p.name;
     el._time = $(".p-time", el);
     el._meta = $(".p-meta", el);
     el._pass = $(".p-pass", el);
+    el._moves = $(".p-moves", el);
     el._last = {};
     el.addEventListener("pointerdown", (e) => {
       if (e.button > 0 || e.target.closest(".p-menu, .p-pass")) return;
@@ -2490,8 +2735,11 @@ function clientApp() {
       }
       if (settings.showMoves && st !== "ready") {
         if (active && st === "running" && !C.moveLimitEnabled && p.turn >= 1000) tags.push(`<span class="tag pc">Turn ${fmtPlain(p.turn)}</span>`);
-        if (p.moves > 0) tags.push(`<span class="tag">${p.moves} move${p.moves === 1 ? "" : "s"}</span>`);
+        if (p.moves > 0) tags.push(`<span class="tag mv">${p.moves} move${p.moves === 1 ? "" : "s"}</span>`);
       }
+      // the plain look's move counter, in the corner
+      const mv = settings.showMoves ? "Moves: " + p.moves : "";
+      if (force || el._last.mv !== mv) { el._moves.textContent = mv; el._last.mv = mv; }
       const meta = tags.join("");
       if (force || el._last.meta !== meta) { el._meta.innerHTML = meta; el._last.meta = meta; }
 
@@ -2845,6 +3093,7 @@ function clientApp() {
   importFromHash();
   applyLook();
   bindSetup();
+  bindPlain();
   renderPresets();
   renderPlayerList();
   syncSetup();

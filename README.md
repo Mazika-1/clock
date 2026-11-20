@@ -18,6 +18,14 @@ The whole site is one Cloudflare Worker (`src/worker.js`) with no backend. Setti
 - Keeps the screen awake, fullscreen, keyboard shortcuts (press `?`), share-a-setup links, a live preview, and resume after a refresh.
 - Installable PWA that works offline.
 
+## Look
+
+The default **Plain** look is flat Material, laid out and coloured after the Chess.com Chess Clock
+app (its source is public: github.com/ChessCom/android-chessclock): a Time Controls list with a
+New Custom Time button and a green Start, and clocks as two full halves (grey waiting, green
+running, red out) with a control bar between them. Settings → Style → **Classic** brings back the
+original look, with its themes and fonts.
+
 ## Android app
 
 `android/` wraps the clock in an Android app that works with no internet: the
