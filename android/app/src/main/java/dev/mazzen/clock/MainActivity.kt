@@ -41,6 +41,12 @@ class MainActivity : Activity() {
         webView.addJavascriptInterface(bridge, "ClockApp")
 
         webView.loadUrl(PAGE + shareHash(intent))
+        Updater.onOpen(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Updater.onLeave(this)      // a downloaded update installs while you're away
     }
 
     // a shared setup link (https://clock.mazzen.dev/#s=...) opened in the app: hand its #s= part

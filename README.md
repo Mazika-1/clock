@@ -28,6 +28,14 @@ publishes it as a release:
 
 https://github.com/Mazika-1/clock/releases/latest/download/Clock.apk
 
+The app updates itself (`Updater.kt`): while it's open it checks the latest release and downloads
+a newer build. On Android 12+, once the app has installed one of its own updates, the next ones
+install by themselves when you leave the app. The first update, and every update on Android 11 and
+older, shows Android's "Update this app?" screen the next time you open it.
+
+Shared setup links (`https://clock.mazzen.dev/#s=...`) open in the app (Android App Links,
+verified by `/.well-known/assetlinks.json`, which the Worker serves before the password check).
+
 ## Deploy
 
 The repo is connected to Cloudflare Workers Builds, so every push to `main` deploys to clock.mazzen.dev.

@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- No internet permission: the whole clock is bundled in the app. -->
+    <!-- The whole clock is bundled in the app and works offline. The internet is only used to
+         check GitHub for a newer build, which the app then installs itself (Updater.kt). -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:allowBackup="true"
@@ -29,5 +32,7 @@
                 <data android:scheme="https" android:host="clock.mazzen.dev" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".InstallResult" android:exported="false" />
     </application>
 </manifest>
