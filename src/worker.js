@@ -1703,7 +1703,10 @@ function clientApp() {
   // PRESET_MODS_STORE as { hidden: [id], overrides: { id: {e, name, sub, s} } }.
   function loadPresetMods() {
     try {
-      const m = JSON.parse(localStorage.getItem(PRESET_MODS_STORE) || "{}");
+      const stored = localStorage.getItem(PRESET_MODS_STORE);
+      // the Android app starts with none of the built-in presets showing
+      if (stored === null && window.ClockApp) return { hidden: PRESETS.map((p) => p.id), overrides: {} };
+      const m = JSON.parse(stored || "{}");
       return { hidden: Array.isArray(m.hidden) ? m.hidden : [], overrides: m.overrides && typeof m.overrides === "object" ? m.overrides : {} };
     } catch (_) { return { hidden: [], overrides: {} }; }
   }
@@ -1768,8 +1771,9 @@ function clientApp() {
     if (!all.length) {
       const empty = document.createElement("p");
       empty.className = "explain presets-empty";
-      empty.textContent = "No presets left. Save your current setup or restore the built-in ones.";
+      empty.innerHTML = `No presets yet. Set things up below and tap <b>Save current</b>, or open a setup someone shared with you. <button class="link-btn" id="addBuiltInBtn" type="button">${icon("plus")} Add the built-in ones</button>`;
       box.appendChild(empty);
+      $("#addBuiltInBtn").onclick = () => { savePresetMods({ hidden: [], overrides: {} }); renderPresets(); toast("Built-in presets added", "plus"); };
     }
     const hidden = loadPresetMods().hidden.length;
     const edited = Object.keys(loadPresetMods().overrides).length;
@@ -1820,17 +1824,18 @@ function clientApp() {
   const PRESET_EMOJI = ["⭐", "⚡", "🔥", "♟️", "🎲", "🃏", "🎤", "🎙️", "🧠", "🏆", "⏱️", "🐢", "🚀", "🎯", "🍕", "👑"];
 
   // One dialog for both "save current setup as a new preset" (p = null) and editing an existing one.
-  function editPresetDialog(p) {
+  // opts (a new one only): { title, note, name, e } (a shared setup offered as a preset)
+  function editPresetDialog(p, opts = {}) {
     const isNew = !p;
     let draft = isNew
-      ? { e: "⭐", name: "", sub: currentSub(), s: currentRules() }
+      ? { e: opts.e || "⭐", name: opts.name || "", sub: currentSub(), s: currentRules() }
       : { e: p.e, name: p.name, sub: p.sub || "", s: clone(p.s) };
     const summary = (s) => {
       const tmp = Object.assign({}, PRESET_BASE, s);
       const n = tmp.numPlayers || settings.numPlayers;
       return esc(n + " player" + (n > 1 ? "s" : "") + " · " + baseLabel(Object.assign({}, settings, tmp)));
     };
-    const card = openModal(mHead(isNew ? "Save as preset" : "Edit preset", isNew ? "star" : "pencil") + `
+    const card = openModal(mHead(opts.title || (isNew ? "Save as preset" : "Edit preset"), isNew ? "star" : "pencil") + (opts.note ? `<p class="explain" style="margin:0 0 14px">${esc(opts.note)}</p>` : "") + `
       <div class="m-section">
         <div class="m-label">Icon</div>
         <div class="emoji-row" id="peEmoji"></div>
@@ -1850,9 +1855,9 @@ function clientApp() {
         <p class="explain" style="margin:8px 0 0">${isNew ? "Saves the rules, player names and colours you have set up right now." : "To change the rules, set things up below the way you want, then come back here and tap <b>Use my current setup</b>."}</p>
       </div>
       <div class="m-actions">
-        ${isNew ? `<button class="btn" data-close>Cancel</button>` : `<button class="btn danger" id="peDelete">${icon("trash")} Delete</button>`}
+        ${isNew ? `<button class="btn" data-close>${opts.title ? "No thanks" : "Cancel"}</button>` : `<button class="btn danger" id="peDelete">${icon("trash")} Delete</button>`}
         ${!isNew && p.edited ? `<button class="btn" id="peReset">${icon("restart")} Original</button>` : ""}
-        <button class="btn primary" id="peSave">${icon("check")} ${isNew ? "Save preset" : "Save changes"}</button>
+        <button class="btn primary" id="peSave">${icon("check")} ${opts.title ? "Add preset" : isNew ? "Save preset" : "Save changes"}</button>
       </div>`);
     const name = $("#peName", card), sub = $("#peSub", card);
     name.value = draft.name; sub.value = draft.sub;
@@ -1902,6 +1907,9 @@ function clientApp() {
   // share links ---------------------------------------------------------
   function encodeShare() {
     const s = {}; RULE_KEYS.forEach((k) => (s[k] = settings[k]));
+    // the setup is one of your presets: send its name and icon too (offered when it's opened)
+    const named = allPresets().find((p) => presetMatches(p.s));
+    if (named) { s.presetName = named.name; s.presetIcon = named.e; }
     s.players = settings.players.map((p) => ({ name: p.name, color: p.color, minutes: p.minutes, seconds: p.seconds }));
     const bytes = new TextEncoder().encode(JSON.stringify(s));
     let bin = ""; bytes.forEach((b) => (bin += String.fromCharCode(b)));
@@ -1915,7 +1923,8 @@ function clientApp() {
   async function shareLink() {
     const url = location.origin + location.pathname + "#s=" + encodeShare();
     try {
-      if (navigator.share && matchMedia("(pointer: coarse)").matches) { await navigator.share({ title: "Game clock", url }); return; }
+      // the phone's share sheet (always in the Android app)
+      if (navigator.share && (window.ClockApp || matchMedia("(pointer: coarse)").matches)) { await navigator.share({ title: "Game clock", url }); return; }
       await navigator.clipboard.writeText(url);
       toast("Link copied", "link");
     } catch (_) {
@@ -1926,16 +1935,22 @@ function clientApp() {
     const m = location.hash.match(/^#s=([A-Za-z0-9_-]+)/);
     if (!m) return;
     try {
-      const s = sanitize(decodeShare(m[1]));
+      const raw = decodeShare(m[1]), s = sanitize(raw);
       const keep = {}; RULE_KEYS.concat(["players"]).forEach((k) => { if (s[k] !== undefined) keep[k] = s[k]; });
       Object.assign(settings, keep);
       ensurePlayers(); saveSettings();
-      setTimeout(() => toast("Settings loaded from link", "link"), 300);
+      if (typeof renderPlayerList === "function" && $("#presets").children.length) { renderPlayerList(); syncSetup(); }
+      // ask whether to keep it as a preset (it's loaded either way)
+      const name = typeof raw.presetName === "string" ? raw.presetName.slice(0, 28) : "";
+      const em = typeof raw.presetIcon === "string" && raw.presetIcon.length <= 4 ? raw.presetIcon : "⭐";
+      setTimeout(() => editPresetDialog(null, { name, e: em, title: "Add this as a preset?", note: "Someone shared this setup with you. It's loaded now; add it to your presets to keep it." }), 300);
     } catch (_) {
       setTimeout(() => toast("That share link is broken"), 300);
     }
     history.replaceState(null, "", location.pathname);
   }
+  // a link opened while the clock is already open (the app hands it over this way)
+  addEventListener("hashchange", () => { if (/^#s=/.test(location.hash)) importFromHash(); });
 
   // live preview in the hero ---------------------------------------------
   const preview = $("#preview");
@@ -2922,4 +2937,18 @@ const site = {
 };
 
 // behind the mazzen.dev site-wide password (src/gate.js; switched on and off on mazzen.dev/stats)
-export default { ...site, fetch: (req, env, ctx) => withGate(req, env, ctx, (r, e, c) => site.fetch(r, e, c)) };
+// Android checks this file (no password in front of it) before it lets the Clock app open
+// clock.mazzen.dev links, so a shared setup opens straight in the app. The fingerprint is the
+// app's signing key (android/app/debug.keystore).
+const ASSET_LINKS = JSON.stringify([{
+  relation: ["delegate_permission/common.handle_all_urls"],
+  target: { namespace: "android_app", package_name: "dev.mazzen.clock",
+    sha256_cert_fingerprints: ["D8:00:7D:59:20:BD:B1:2E:0A:7E:77:07:FC:AB:C9:E5:70:3F:5E:82:D4:3B:70:68:2A:DB:6C:ED:91:8C:42:C5"] },
+}]);
+
+export default {
+  ...site,
+  fetch: (req, env, ctx) => new URL(req.url).pathname === "/.well-known/assetlinks.json"
+    ? new Response(ASSET_LINKS, { headers: { "content-type": "application/json", "cache-control": "public, max-age=3600" } })
+    : withGate(req, env, ctx, (r, e, c) => site.fetch(r, e, c)),
+};

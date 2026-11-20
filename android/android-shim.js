@@ -12,6 +12,14 @@
     getVoices: function () { return []; },
   };
 
+  // sharing a setup link: the phone's share sheet
+  navigator.share = function (d) {
+    d = d || {};
+    try { A.share(String(d.title || "Game clock"), String(d.url || d.text || "")); return Promise.resolve(); }
+    catch (e) { return Promise.reject(e); }
+  };
+  navigator.canShare = function () { return true; };
+
   // haptics
   navigator.vibrate = function (p) { try { A.vibrate(JSON.stringify(Array.isArray(p) ? p : [p])); } catch (_) {} return true; };
 

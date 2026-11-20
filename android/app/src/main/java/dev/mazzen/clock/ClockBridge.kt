@@ -9,7 +9,7 @@ import org.json.JSONArray
 
 /**
  * The phone features Android's WebView doesn't give a web page on its own:
- * the voice announcer, vibration, keeping the screen on and fullscreen.
+ * the voice announcer, vibration, keeping the screen on, fullscreen and sharing.
  * Exposed to the page as window.ClockApp; android-shim.js wires the
  * standard web APIs (speechSynthesis, navigator.vibrate, wakeLock,
  * requestFullscreen) through to it.
@@ -19,6 +19,18 @@ class ClockBridge(private val activity: MainActivity) {
     private var tts: TextToSpeech? = null
     private var ttsReady = false
     private var pending: Pair<String, Float>? = null
+
+    // the phone's share sheet (WebView has no navigator.share)
+    @JavascriptInterface
+    fun share(title: String, url: String) {
+        activity.runOnUiThread {
+            val send = android.content.Intent(android.content.Intent.ACTION_SEND)
+                .setType("text/plain")
+                .putExtra(android.content.Intent.EXTRA_SUBJECT, title)
+                .putExtra(android.content.Intent.EXTRA_TEXT, url)
+            activity.startActivity(android.content.Intent.createChooser(send, title))
+        }
+    }
 
     @JavascriptInterface
     fun speak(text: String, rate: Float) {

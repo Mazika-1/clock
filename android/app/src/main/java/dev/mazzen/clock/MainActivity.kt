@@ -2,6 +2,7 @@ package dev.mazzen.clock
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -39,8 +40,25 @@ class MainActivity : Activity() {
         bridge = ClockBridge(this)
         webView.addJavascriptInterface(bridge, "ClockApp")
 
-        webView.loadUrl("file:///android_asset/www/index.html")
+        webView.loadUrl(PAGE + shareHash(intent))
     }
+
+    // a shared setup link (https://clock.mazzen.dev/#s=...) opened in the app: hand its #s= part
+    // to the clock, which loads it and asks whether to keep it as a preset
+    private fun shareHash(i: Intent?): String {
+        val frag = i?.data?.fragment ?: return ""
+        return if (frag.startsWith("s=")) "#$frag" else ""
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val hash = shareHash(intent)
+        // (the page saves the game in progress as it goes, so reloading it loses nothing)
+        if (hash.isNotEmpty()) webView.loadUrl(PAGE + hash)
+    }
+
+    private companion object { const val PAGE = "file:///android_asset/www/index.html" }
 
     fun setKeepAwake(on: Boolean) = runOnUiThread {
         if (on) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
