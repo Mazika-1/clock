@@ -11,7 +11,8 @@ const out = join(here, "app/src/main/assets/www");
 const worker = (await import(join(here, "../src/worker.js"))).default;
 
 const get = async (path) => {
-  const res = await worker.fetch(new Request("https://clock.mazzen.dev" + path));
+  // (no env: no GATE binding, so the mazzen.dev password check is skipped for the app's copy)
+  const res = await worker.fetch(new Request("https://clock.mazzen.dev" + path), {}, { waitUntil() {} });
   if (!res.ok) throw new Error(path + " -> " + res.status);
   return res.text();
 };
